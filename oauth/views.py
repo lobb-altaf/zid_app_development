@@ -52,28 +52,52 @@ class OauthCallbackView(View):
             # TODO CHECK IS USER ALREADY EXIST
             # TODO associate user_obj with Django User model
 
-            zid_user_obj = ZidUser.objects.create(
-                user_id=profile_data["id"],
-                user_uuid=profile_data["uuid"],
-                name=profile_data["name"],
-                email=profile_data["email"],
-                mobile=profile_data["mobile"],
-                access_token=access_token,
-                refresh_token=data["refresh_token"],
-                authorization_code=manager_token,
-                token_type=data["token_type"],
-                expires_in=data["expires_in"],
-            )
-            zid_user_obj.save()
+            if ZidUser.objects.filter(
+                user_id=profile_data["id"], user=request.user
+            ).exists():
+                # exising account
+                zid_user_obj = ZidUser.objects.get(
+                    user_id=profile_data["id"], user=request.user
+                )
+                zid_user_obj.access_token = access_token
+                zid_user_obj.refresh_token = data["refresh_token"]
+                zid_user_obj.authorization_code = manager_token
+                zid_user_obj.token_type = data["token_type"]
+                zid_user_obj.expires_in = data["expires_in"]
+                zid_user_obj.save()
 
-            zid_user_store_obj = ZidUserStore.objects.create(
-                zid_user=zid_user_obj,
-                store_id=profile_data["store"]["id"],
-                store_uuid=profile_data["store"]["uuid"],
-                title=profile_data["store"]["title"],
-                username=profile_data["store"]["username"],
-            )
-            zid_user_store_obj.save()
+            else:
+                # new account
+
+                zid_user_obj = ZidUser.objects.create(
+                    user=request.user,
+                    user_id=profile_data["id"],
+                    user_uuid=profile_data["uuid"],
+                    name=profile_data["name"],
+                    email=profile_data["email"],
+                    mobile=profile_data["mobile"],
+                    access_token=access_token,
+                    refresh_token=data["refresh_token"],
+                    authorization_code=manager_token,
+                    token_type=data["token_type"],
+                    expires_in=data["expires_in"],
+                )
+                zid_user_obj.save()
+
+            if ZidUserStore.objects.filter(
+                zid_user=zid_user_obj, store_id=profile_data["store"]["id"]
+            ).exists():
+                pass
+            else:
+                # new store
+                zid_user_store_obj = ZidUserStore.objects.create(
+                    zid_user=zid_user_obj,
+                    store_id=profile_data["store"]["id"],
+                    store_uuid=profile_data["store"]["uuid"],
+                    title=profile_data["store"]["title"],
+                    username=profile_data["store"]["username"],
+                )
+                zid_user_store_obj.save()
 
         else:
             response.raise_for_status()
@@ -2718,7 +2742,20 @@ def handle_webhook(request):
                 print(json_data)
                 store = ZidUserStore.objects.get(store_id=json_data["store_id"])
                 # get user from store
-                get_store_user = store.zid_user.user
+                get_store_user = store.zid_user.user.id
+
+                # request_user = request.user
+                # if request_user.is_company_user:
+                #     supplier = request_user.manager_id
+                # else:
+                #     supplier = request_user
+
+                # if request.user.is_company_admin:
+                #     user_id = request.user.id
+                # elif request.user.is_company_user:
+                #     user_id = request.user.manager_id
+
+                # print(request_user)
                 # Add your order handling logic here
                 # Extract customer data
                 customer_name = json_data["customer"]["name"]

@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 # TODO will associate(o2o) this with Django User model
 class ZidUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=50, null=True, blank=True)
     user_uuid = models.CharField(max_length=50, null=True, blank=True)
     name = models.CharField(max_length=50, null=True, blank=True)
