@@ -101,6 +101,9 @@ class OauthCallbackView(View):
 
         else:
             response.raise_for_status()
+
+
+        create_webhook(request)
         return redirect("/")
 
 
@@ -158,70 +161,65 @@ from django.shortcuts import render
 #    'authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzMzQ4IiwianRpIjoiMWE0NmE0ZWRjMGM2ZDE4MGM4NjdmNjZkZTBlZDIzODkwNWYwMjBmZmYxNDhkNzc0MmE2NGQ0NGM2ZGY2ZmQ3OGE0OWI4ODBlODU3MzM3MTgiLCJpYXQiOjE3MjMxNDMwMTYuNzk0Njg3LCJuYmYiOjE3MjMxNDMwMTYuNzk0Njg5LCJleHAiOjE3NTQ2NzkwMTYuNzUzNTgsInN1YiI6IjQ3MjU4NyIsInNjb3BlcyI6WyJ0aGlyZF9jYXRlZ29yaWVzX3dyaXRlIiwidGhpcmRfY3VzdG9tZXJzX3dyaXRlIiwidGhpcmRfb3JkZXJfd3JpdGUiLCJ0aGlyZF9jb3Vwb25zX3dyaXRlIiwidGhpcmRfZGVsaXZlcnlfb3B0aW9uc193cml0ZSIsInRoaXJkX3dlYmhvb2tfd3JpdGUiLCJ0aGlyZF9wcm9kdWN0X3dyaXRlIiwidGhpcmRfY2F0YWxvZ193cml0ZSIsInRoaXJkX2pzX3dyaXRlIiwidGhpcmRfY3JlYXRlX29yZGVyIiwidGhpcmRfcHJvZHVjdF9zdG9ja193cml0ZSIsInRoaXJkX2ludmVudG9yeV93cml0ZSIsImVtYmVkZGVkX2FwcHNfdG9rZW5zX3dyaXRlIl19.LzdcNSLvmWz9pBXpAqm4yZulXSVVzyooiPDjuwNODrP6-mU99wd0ri1U2bfCEdA7_f1b6tVS6mMAwj9vQjCLUI6qYfcU5E24ZBDdpGNlfpBXRRQmFw27IzYbjGpaO6d2NpCDVdpri5r1-QHHtIIP6et_9jNF4TwIhn550qqh7lg-nySS8LYFtIMK-RQqPwFOA7p9YyqxZ4Tpu2s-diLI3NMOGiQAfAqch5hiD9pqFhxS26J57CF_6UBY4Nyx6Z483dD8d_XVN0uRHm299n1FmUGN4WtYsjjFvCZo5Zubg79Cq6yWx2wELgFrgNwdLDyQ7t4cueGolMly80y2rAEgaJEL4S2zHPG-jOIjqSjwLCrszOmJ6idkBqgETZ6Ad4t4i_xuDiExPcKOehXNr9RvtBKLIZMZhgwb_mfJyGUwoEiR7Q01s_SjmsyUZ-0ZWL3Yh20EzYE3CJ7oue9LPmjAxix4uOUUtq_RaeATQPWr8jAzIDQZA9UtW2xQSV-VfRj4AyzCjw7su-jX8Ejg2wAGcNlSJeB5sMeCBa8Zl35wETqhiGOoTSJqCbTF75PGLPvT0jOFF59C7BlyLOR8-GmbjBaEkLYB3xD1NG-4xMageDxp0ozwnysG90X7d7QISLjkuq4iUBWDYcs-2oXGFC3-XBJMUu3Xu1s3BhzVATjPH_w', 'refresh_token': 'def502000e19b2904546f95b688c9c8f353824f1ca4bd763e5ca4d5e2b348e96e7c9251ca0e5e5ef082b037bbef7ebd89aee63256a6c141d6e196dab0f480eb6a78caff80efdda371f90d992fc0f06d95ba22611cf72dc18381a417b5546b5b7e9fc4fd60d944b9ce778ee54375a3be72f2809bd9953e80ed0abdfeb92aa88bff04b3972581e4bdf3fb11aed087146a7b21a4e10e99ab49e590b04976724886d97956e3aaf7f83b813a600ec2e1312d94680c7412d9711284a1e48d830f2217952f1dba39e4b580e497b2591793a9302046f2bf1fd62e00df5e7ea1afdd37cf162b6ab2d50e7743a469ab2daeb10830ef94eb4d914e6bd865ef9c2b2b234f4ccad5ba9d349c56ea6808de59d88dc9b2ca213e3dec9cf3b1ce462dcc22ca533bdd16c06c8d4c27e9e543135f8d481fd30072c4670d5be825482debfb991dfa545e766dbea542959a500dc45f96127034b08a73ebd027b4200dff5f4bc9059715345aef2dc9e418eda53b107a7241705634dfa6b341fad3845cd3dc3eedca00ce05ed1f028376a146d3d34301da5c2b20a887cce206807d9f16b7752c4b0dc33d320b7adcea1bbf3835923da0f945d9067e43a042c46da600a4c1634d82c4b0f189d9068b15f762b09bb2bbbbf41d8af19b074aa6ec37ef14257db3708848916308a0ba13e49033e76a67014ac7d8f75b1056a0558e58d1fcd6222d4550469cc460aa9da88be1574d4204d03b487d86e0f45ad06b14491bcd1cf1939df5987a96dcd48c06f45db28bdd63b0026de31e5fed47772212e6a55a2c32b7991be957ac38679c0e4f6c9c4e68bba442370333774a7b265abd222cd7b47cb06701586406234f0dd73ae1fd7710cf793e834e115a9d15ead6e972ceda990e4a0e96b3d4a2c45e71ea8c8eba3eabd5b49795e40e86659c2ad0f0371baa9183fd2'}
 
 
-@csrf_exempt
+# @csrf_exempt
 def create_webhook(request):
-    token_data = ZidUser.objects.latest("created_at")
-    if request.method == "POST":
-        api_url = "https://api.zid.sa/v1/managers/webhooks"
+    token_data = ZidUser.objects.filter(user=request.user).first()
+    api_url = "https://api.zid.sa/v1/managers/webhooks"
 
-        headers = {
-            "Accept-Language": "en",
-            "Authorization": f"Bearer {token_data.authorization_code}",
-            "X-Manager-Token": token_data.access_token,
-            "Content-Type": "application/json",
-        }
+    headers = {
+        "Accept-Language": "en",
+        "Authorization": f"Bearer {token_data.authorization_code}",
+        "X-Manager-Token": token_data.access_token,
+        "Content-Type": "application/json",
+    }
 
-        webhook_data = {
-            # "event": "order.status.update",
-            "event": "order.create",
-            "target_url": "https://lm1h3n2p-8000.inc1.devtunnels.ms/webhook/ ",
-            "original_id": 3500,
-            "subscriber": "My Online Store App",
-            "conditions": {
-                "status": "new",
-                # "delivery_option_id": 55,
-                "payment_method": "Cash On Delivery",
-            },
-        }
+    webhook_data = {
+        # "event": "order.status.update",
+        "event": "order.create",
+        "target_url": "https://lm1h3n2p-8000.inc1.devtunnels.ms/webhook/ ",
+        "original_id": 3500,
+        "subscriber": "My Online Store App",
+        "conditions": {
+            "status": "new",
+            # "delivery_option_id": 55,
+            "payment_method": "Cash On Delivery",
+        },
+    }
 
-        #     webhook_data = {
-        #     "event": "order.create",
-        #     "target_url": "https://webhook.site/c5f8dcff-1170-42da-a465-462c8d8147b2",
-        #     "original_id": 1,
-        #     "subscriber": "e2065cb56f5533494522c46a72f1dfb0",
-        # }
+    #     webhook_data = {
+    #     "event": "order.create",
+    #     "target_url": "https://webhook.site/c5f8dcff-1170-42da-a465-462c8d8147b2",
+    #     "original_id": 1,
+    #     "subscriber": "e2065cb56f5533494522c46a72f1dfb0",
+    # }
 
-        response = requests.post(api_url, headers=headers, json=webhook_data)
-        print(response.text)
-        print("------------------")
-        print(response.status_code)
+    response = requests.post(api_url, headers=headers, json=webhook_data)
+    print(response.text)
+    print("------------------")
+    print(response.status_code)
 
-        print("------------------")
-        print(response)
-        print("------------------")
+    print("------------------")
+    print(response)
+    print("------------------")
 
-        # print(response.json())
-        response_data = {
-            "status_code": response.status_code,
-            "content": response.text,
-            "json_response": (
-                response.json()
-                if response.headers.get("content-type") == "application/json"
-                else None
-            ),
-            "content_type": response.headers.get("content-type"),
-        }
+    # print(response.json())
+    response_data = {
+        "status_code": response.status_code,
+        "content": response.text,
+        "json_response": (
+            response.json()
+            if response.headers.get("content-type") == "application/json"
+            else None
+        ),
+        "content_type": response.headers.get("content-type"),
+    }
 
-        if response.status_code == 200:
-            response_data["message"] = "Webhook subscription created successfully."
-        else:
-            response_data["message"] = (
-                f"Error: {response.status_code} - {response.text}"
-            )
+    if response.status_code == 200:
+        response_data["message"] = "Webhook subscription created successfully."
+    else:
+        response_data["message"] = f"Error: {response.status_code} - {response.text}"
 
-        return JsonResponse(response_data)
-
-    return render(request, "oauth/create_webhook.html")
+    return JsonResponse(response_data)
 
 
 from django.http import JsonResponse
