@@ -29,7 +29,11 @@ class OauthRedirectView(View):
         )
 
 
-class OauthCallbackView(View):
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+class OauthCallbackView(LoginRequiredMixin, View):
+
     def get(self, request, *args, **kwargs):
         code = request.GET.get("code")
         payload = {
@@ -39,7 +43,7 @@ class OauthCallbackView(View):
             "code": code,
         }
         response = requests.post(f"{BASE_URL}/oauth/token", json=payload)
-        # TODO : assicate request with user with TokenData
+        # TODO : assicte request with user with TokenData
         if response.status_code == 200:
             data = response.json()
             print("data", data)
@@ -53,11 +57,11 @@ class OauthCallbackView(View):
             # TODO associate user_obj with Django User model
 
             if ZidUser.objects.filter(
-                user_id=profile_data["id"], user=request.user
+                user_id=profile_data["id"], django_user=request.user
             ).exists():
-                # exising account
+                # exisng account
                 zid_user_obj = ZidUser.objects.get(
-                    user_id=profile_data["id"], user=request.user
+                    user_id=profile_data["id"], django_user=request.user
                 )
                 zid_user_obj.access_token = access_token
                 zid_user_obj.refresh_token = data["refresh_token"]
@@ -69,20 +73,28 @@ class OauthCallbackView(View):
             else:
                 # new account
 
-                zid_user_obj = ZidUser.objects.create(
-                    user=request.user,
-                    user_id=profile_data["id"],
-                    user_uuid=profile_data["uuid"],
-                    name=profile_data["name"],
-                    email=profile_data["email"],
-                    mobile=profile_data["mobile"],
-                    access_token=access_token,
-                    refresh_token=data["refresh_token"],
-                    authorization_code=manager_token,
-                    token_type=data["token_type"],
-                    expires_in=data["expires_in"],
-                )
-                zid_user_obj.save()
+                try:
+
+                    zid_user_obj = ZidUser.objects.create(
+                        django_user=request.user,
+                        user_id=profile_data["id"],
+                        user_uuid=profile_data["uuid"],
+                        name=profile_data["name"],
+                        email=profile_data["email"],
+                        mobile=profile_data["mobile"],
+                        access_token=access_token,
+                        refresh_token=data["refresh_token"],
+                        authorization_code=manager_token,
+                        token_type=data["token_type"],
+                        expires_in=data["expires_in"],
+                    )
+                    zid_user_obj.save()
+
+                except Exception as e:
+                    print(e)
+                    return HttpResponse(
+                        "You can't have more than one account with the same email address"
+                    )
 
             if ZidUserStore.objects.filter(
                 zid_user=zid_user_obj, store_id=profile_data["store"]["id"]
@@ -102,6 +114,7 @@ class OauthCallbackView(View):
         else:
             response.raise_for_status()
 
+        print("creating webhook")
 
         create_webhook(request)
         return redirect("/")
@@ -163,7 +176,7 @@ from django.shortcuts import render
 
 # @csrf_exempt
 def create_webhook(request):
-    token_data = ZidUser.objects.filter(user=request.user).first()
+    token_data = ZidUser.objects.filter(django_user=request.user).first()
     api_url = "https://api.zid.sa/v1/managers/webhooks"
 
     headers = {
@@ -174,15 +187,15 @@ def create_webhook(request):
     }
 
     webhook_data = {
-        # "event": "order.status.update",
-        "event": "order.create",
+        "event": "order.status.update",
+        # "event": "order.create",
         "target_url": "https://lm1h3n2p-8000.inc1.devtunnels.ms/webhook/ ",
         "original_id": 3500,
         "subscriber": "My Online Store App",
         "conditions": {
-            "status": "new",
+            "status": "delivered",
             # "delivery_option_id": 55,
-            "payment_method": "Cash On Delivery",
+            # "payment_method": "Cash On Delivery",
         },
     }
 
@@ -213,6 +226,7 @@ def create_webhook(request):
         ),
         "content_type": response.headers.get("content-type"),
     }
+    print(response.text)
 
     if response.status_code == 200:
         response_data["message"] = "Webhook subscription created successfully."
@@ -221,6 +235,8 @@ def create_webhook(request):
 
     return JsonResponse(response_data)
 
+
+# create_webhook()
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -2740,18 +2756,18 @@ def handle_webhook(request):
                 print(json_data)
                 store = ZidUserStore.objects.get(store_id=json_data["store_id"])
                 # get user from store
-                get_store_user = store.zid_user.user.id
+                get_store_user = store.zid_user.django_user
+                print("get_store_user", get_store_user)
 
-                # request_user = request.user
-                # if request_user.is_company_user:
-                #     supplier = request_user.manager_id
+                # if get_store_user.is_company_user:
+                #     supplier = get_store_user.manager_id
                 # else:
-                #     supplier = request_user
+                #     supplier = get_store_user
 
-                # if request.user.is_company_admin:
-                #     user_id = request.user.id
-                # elif request.user.is_company_user:
-                #     user_id = request.user.manager_id
+                # if get_store_user.is_company_admin:
+                #     user_id = get_store_user.id
+                # elif get_store_user.is_company_user:
+                #     user_id = get_store_user.manager_id
 
                 # print(request_user)
                 # Add your order handling logic here
