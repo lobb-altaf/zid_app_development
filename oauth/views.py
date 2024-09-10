@@ -185,13 +185,13 @@ def create_webhook(request):
         "Content-Type": "application/json",
     }
 
-    subdomain = request.tenant
+  
     host = request.get_host()
 
     webhook_data = {
         "event": "order.status.update",
         # "event": "order.create",
-        "target_url": f"http://{subdomain}.{host}/webhook/ ",
+        "target_url": f"http://{host}/webhook/ ",
         "original_id": 3500,
         "subscriber": "My Online Store App",
         "conditions": {

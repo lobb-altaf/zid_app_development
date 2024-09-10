@@ -5,7 +5,7 @@ from django.http import HttpResponse
 
 def index(request):
     print(request, dir(request))
-    return HttpResponse(f"<h1>Public Index {request.session}</h1>")
+    return HttpResponse(f"<h1>Public Index {request.user}</h1>")
 
 
 def callback(request):
