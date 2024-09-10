@@ -25,15 +25,14 @@ def index(request):
 class OauthRedirectView(View):
     def get(self, request, *args, **kwargs):
         return redirect(
-            f"{BASE_URL}/oauth/authorize?client_id={CLIENT_ID}&response_type=code"
+            f"{BASE_URL}/oauth/authorize?client_id={CLIENT_ID}&response_type=code&state={request.tenant}"
         )
 
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-class OauthCallbackView(LoginRequiredMixin, View):
-
+class OauthCallbackView(View):
     def get(self, request, *args, **kwargs):
         code = request.GET.get("code")
         payload = {
@@ -42,6 +41,7 @@ class OauthCallbackView(LoginRequiredMixin, View):
             "client_secret": CLIENT_SECRET,
             "code": code,
         }
+
         response = requests.post(f"{BASE_URL}/oauth/token", json=payload)
         # TODO : assicte request with user with TokenData
         if response.status_code == 200:
@@ -74,7 +74,6 @@ class OauthCallbackView(LoginRequiredMixin, View):
                 # new account
 
                 try:
-
                     zid_user_obj = ZidUser.objects.create(
                         django_user=request.user,
                         user_id=profile_data["id"],
@@ -186,10 +185,13 @@ def create_webhook(request):
         "Content-Type": "application/json",
     }
 
+    subdomain = request.tenant
+    host = request.get_host()
+
     webhook_data = {
         "event": "order.status.update",
         # "event": "order.create",
-        "target_url": "https://lm1h3n2p-8000.inc1.devtunnels.ms/webhook/ ",
+        "target_url": f"http://{subdomain}.{host}/webhook/ ",
         "original_id": 3500,
         "subscriber": "My Online Store App",
         "conditions": {
@@ -265,7 +267,6 @@ def create_an_invoice(
     discount_on_totals,
     charge_on_totals,
 ):
-
     # try:
     def number_with_n_digits_after_the_point(the_number, n=2):
         if type(the_number) == int:
@@ -532,7 +533,6 @@ def create_an_invoice(
         the_total_of_the_tax = 0.0
 
         for i in after_discount_each_tax_total:
-
             the_total_without_discount_and_without_charge_and_without_tax = (
                 each_tax_total.get(i)
             )
@@ -636,7 +636,6 @@ def create_an_invoice(
         )
 
         while the_discount_amount > the_discounted_amount:
-
             the_discount_amount = discount_on_totals.get("discount_value")
             the_discounted_amount = round(
                 calculate_the_total_without_tax()
@@ -647,7 +646,6 @@ def create_an_invoice(
             discounting_status = False
 
             if the_discount_amount > the_discounted_amount:
-
                 the_rest = round(the_discount_amount - the_discounted_amount, 10)
 
                 for i in after_discount_each_tax_total:
@@ -680,7 +678,6 @@ def create_an_invoice(
                             break
 
         while the_discount_amount < the_discounted_amount:
-
             the_discount_amount = discount_on_totals.get("discount_value")
             the_discounted_amount = round(
                 calculate_the_total_without_tax()
@@ -691,7 +688,6 @@ def create_an_invoice(
             adding_status = False
 
             if the_discount_amount < the_discounted_amount:
-
                 the_rest = round(the_discounted_amount - the_discount_amount, 10)
 
                 for i in after_discount_each_tax_total:
@@ -758,7 +754,6 @@ def create_an_invoice(
         )
 
         while the_charge_amount > the_charged_amount:
-
             the_charge_amount = charge_on_totals.get("charge_value")
             the_charged_amount = round(
                 calculate_the_total_after_charge() - calculate_the_total_without_tax(),
@@ -768,7 +763,6 @@ def create_an_invoice(
             charging_status = False
 
             if the_charge_amount > the_charged_amount:
-
                 the_rest = round(the_charge_amount - the_charged_amount, 10)
 
                 for i in after_charge_each_tax_total:
@@ -799,7 +793,6 @@ def create_an_invoice(
                         break
 
         while the_charge_amount < the_charged_amount:
-
             the_charge_amount = charge_on_totals.get("charge_value")
             the_charged_amount = round(
                 calculate_the_total_after_charge() - calculate_the_total_without_tax(),
@@ -809,7 +802,6 @@ def create_an_invoice(
             adding_status = False
 
             if the_charge_amount < the_charged_amount:
-
                 the_rest = round(the_charged_amount - the_charge_amount, 10)
 
                 for i in after_charge_each_tax_total:
@@ -2219,7 +2211,6 @@ def create_an_invoice(
                         product.get("discount_on_unit").get("discount_type")
                         == "percentage"
                     ):
-
                         if (
                             number_with_n_digits_after_the_point(
                                 round(
@@ -2719,7 +2710,6 @@ import requests
 
 @csrf_exempt
 def handle_webhook(request):
-
     #######We must need to get current user in here THIS IS THE MAIN REQUIREMENT BASED ON IT WE WILL MAKE OPERATION#######
     # request_user = request.user
     # if request_user.is_company_user:
@@ -2798,7 +2788,6 @@ def handle_webhook(request):
                 product_list = []
 
                 for product in products:
-
                     # Assuming `product` is an instance of `InvoiceProducts` model
                     product_data = {
                         "number": product["id"],
@@ -2955,7 +2944,6 @@ def handle_webhook(request):
 
 
 def create_invoice_view(request):
-
     data = """
     {
    "id":39862770,
@@ -3235,7 +3223,6 @@ def create_invoice_view(request):
     product_list = []
 
     for product in products:
-
         # Assuming `product` is an instance of `InvoiceProducts` model
         product_data = {
             "number": product["id"],
