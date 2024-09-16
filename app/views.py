@@ -12,5 +12,5 @@ def callback(request):
     code = request.GET.get("code")
     subdomain = request.GET.get("state")
     host = request.get_host()
-    redirect_uri = f"http://{subdomain}.{host}/callback?code={code}"
+    redirect_uri = f"https://56ff-103-151-234-22.ngrok-free.app/callback?code={code}"
     return redirect(redirect_uri)

@@ -47,3 +47,11 @@ class ZidUserStore(models.Model):
 
 #     def __str__(self):
 #         return f"Token {self.id} - Expires in {self.expires_in} seconds"
+
+
+"""
+from app.models import *
+t=Client(schema_name='test', name='test')
+
+
+"""
